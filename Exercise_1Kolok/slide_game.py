@@ -22,12 +22,13 @@ from pygame.locals import (
 )
 
 # Create the constants (go ahead and experiment with different values)
-BOARDWIDTH = 4  # number of columns in the board
-BOARDHEIGHT = 4  # number of rows in the board
-TILESIZE = 80
-WINDOWWIDTH = 640
-WINDOWHEIGHT = 480
-FPS = 30
+# Baranje 4 i 8
+BOARDWIDTH = random.randint(4, 8)  # number of columns in the board
+BOARDHEIGHT = random.randint(4, 8)  # number of rows in the board
+TILESIZE = 90  # Baranje 1
+WINDOWWIDTH = 1280
+WINDOWHEIGHT = 960
+FPS = 31  # Baranje 6 ?
 BLANK = None
 
 #                 R    G    B
@@ -66,7 +67,9 @@ def main():
         NEW_SURF, \
         NEW_RECT, \
         SOLVE_SURF, \
-        SOLVE_RECT
+        SOLVE_RECT, \
+        UNDO_SURF, \
+        UNDO_RECT
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -75,6 +78,10 @@ def main():
     BASICFONT = pygame.font.Font("freesansbold.ttf", BASICFONTSIZE)
 
     # Store the option buttons and their rectangles in OPTIONS.
+    # Baranje 7
+    UNDO_SURF, UNDO_RECT = makeText(
+        "Undo", TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 120
+    )
     RESET_SURF, RESET_RECT = makeText(
         "Reset", TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90
     )
@@ -85,7 +92,9 @@ def main():
         "Solve", TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30
     )
 
-    mainBoard, solutionSeq = generateNewPuzzle(80)
+    total_moves = 0  # Baranje 3
+
+    mainBoard, solutionSeq = generateNewPuzzle(random.randint(1, 100))  # Baranje 2
     SOLVEDBOARD = (
         getStartingBoard()
     )  # a solved board is the same as the board in a start state.
@@ -93,9 +102,12 @@ def main():
 
     while True:  # main game loop
         slideTo = None  # the direction, if any, a tile should slide
-        msg = "Click tile or press arrow keys to slide."  # contains the message to show in the upper left corner.
         if mainBoard == SOLVEDBOARD:
-            msg = "Solved!"
+            msg = f"Solved in {total_moves} moves, optimal: {len(solutionSeq)}"
+        if total_moves > 0:
+            msg = f"Total moves: {total_moves}"
+        else:
+            msg = "Click tile or press arrow keys to slide."  # contains the message to show in the upper left corner.
 
         drawBoard(mainBoard, msg)
 
@@ -109,16 +121,38 @@ def main():
                     if RESET_RECT.collidepoint(event.pos):
                         resetAnimation(mainBoard, allMoves)  # clicked on Reset button
                         allMoves = []
+                        total_moves = 0
                     elif NEW_RECT.collidepoint(event.pos):
                         mainBoard, solutionSeq = generateNewPuzzle(
-                            80
+                            random.randint(1, 100)
                         )  # clicked on New Game button
                         allMoves = []
+                        total_moves = 0
                     elif SOLVE_RECT.collidepoint(event.pos):
                         resetAnimation(
                             mainBoard, solutionSeq + allMoves
                         )  # clicked on Solve button
                         allMoves = []
+                        total_moves = 0
+                    elif UNDO_RECT.collidepoint(event.pos):
+                        if len(allMoves) > 0:
+                            move = allMoves.pop()
+                            if move == UP:
+                                oppositeMove = DOWN
+                            elif move == DOWN:
+                                oppositeMove = UP
+                            elif move == RIGHT:
+                                oppositeMove = LEFT
+                            elif move == LEFT:
+                                oppositeMove = RIGHT
+                            slideAnimation(
+                                mainBoard,
+                                oppositeMove,
+                                "Undoing",
+                                animationSpeed=int(TILESIZE / 2),
+                            )
+                            makeMove(mainBoard, oppositeMove)
+                            total_moves -= 1
                 else:
                     # check if the clicked tile was next to the blank spot
 
@@ -145,9 +179,10 @@ def main():
 
         if slideTo:
             slideAnimation(
-                mainBoard, slideTo, "Click tile or press arrow keys to slide.", 8
+                mainBoard, slideTo, msg, animationSpeed=10
             )  # show slide on screen
             makeMove(mainBoard, slideTo)
+            total_moves += 1
             allMoves.append(slideTo)  # record the slide
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -306,6 +341,7 @@ def drawBoard(board, message):
     DISPLAYSURF.blit(RESET_SURF, RESET_RECT)
     DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
     DISPLAYSURF.blit(SOLVE_SURF, SOLVE_RECT)
+    DISPLAYSURF.blit(UNDO_SURF, UNDO_RECT)
 
 
 def slideAnimation(board, direction, message, animationSpeed):
@@ -358,6 +394,7 @@ def generateNewPuzzle(numSlides):
     pygame.display.update()
     pygame.time.wait(500)  # pause 500 milliseconds for effect
     lastMove = None
+    FPSCLOCK.tick(FPS * 5)
     for i in range(numSlides):
         move = getRandomMove(board, lastMove)
         slideAnimation(
@@ -366,6 +403,7 @@ def generateNewPuzzle(numSlides):
         makeMove(board, move)
         sequence.append(move)
         lastMove = move
+    FPSCLOCK.tick(FPS)
     return (board, sequence)
 
 
