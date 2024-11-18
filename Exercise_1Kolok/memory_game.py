@@ -14,8 +14,8 @@ WINDOWHEIGHT = 480  # size of windows' height in pixels
 REVEALSPEED = 8  # speed boxes' sliding reveals and covers
 BOXSIZE = 40  # size of box height & width in pixels
 GAPSIZE = 10  # size of gap between boxes in pixels
-BOARDWIDTH = 10  # number of columns of icons
-BOARDHEIGHT = 7  # number of rows of icons
+BOARDWIDTH = 2  # number of columns of icons
+BOARDHEIGHT = 2  # number of rows of icons
 assert (
     BOARDWIDTH * BOARDHEIGHT
 ) % 2 == 0, "Board needs to have an even number of boxes for pairs of matches."
@@ -50,6 +50,9 @@ ALLSHAPES = (DONUT, SQUARE, DIAMOND, LINES, OVAL)
 assert (
     len(ALLCOLORS) * len(ALLSHAPES) * 2 >= BOARDWIDTH * BOARDHEIGHT
 ), "Board is too big for the number of shapes/colors defined."
+
+game_win_image = pygame.image.load("Exercise_1Kolok/image.png")
+game_win_image = pygame.transform.scale(game_win_image, (640, 480))
 
 
 def main():
@@ -246,7 +249,12 @@ def drawBoxCovers(board, boxes, coverage):
         shape, color = getShapeAndColor(board, box[0], box[1])
         drawIcon(shape, color, box[0], box[1])
         if coverage > 0:  # only draw the cover if there is an coverage
-            pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, coverage, BOXSIZE))
+            # Baranje 2
+            pygame.draw.rect(
+                DISPLAYSURF,
+                BOXCOLOR,
+                (left + BOXSIZE - coverage, top, coverage, BOXSIZE),
+            )
     pygame.display.update()
     FPSCLOCK.tick(FPS)
 
@@ -300,18 +308,50 @@ def startGameAnimation(board):
         coverBoxesAnimation(board, boxGroup)
 
 
+# Baranje 1
 def gameWonAnimation(board):
     # flash the background color when the player has won
-    coveredBoxes = generateRevealedBoxesData(True)
-    color1 = LIGHTBGCOLOR
-    color2 = BGCOLOR
+    coveredBoxes = generateRevealedBoxesData(
+        True
+    )  # Create a 2D list where all boxes are marked as revealed
+    box_color_1 = GREEN  # First color for the flashing effect
+    box_color_2 = YELLOW  # Second color for the flashing effect
+    for _ in range(2):  # Repeat the flashing effect 15 times
+        for color in [box_color_1, box_color_2]:  # Alternate between the two colors
+            for box_x in range(BOARDWIDTH):  # Iterate over each column of the board
+                for box_y in range(BOARDHEIGHT):  # Iterate over each row of the board
+                    left, top = leftTopCoordsOfBox(
+                        box_x, box_y
+                    )  # Get the pixel coordinates of the box
+                    pygame.draw.rect(
+                        DISPLAYSURF,  # The surface to draw on
+                        color,  # The color to use for the rectangle
+                        (
+                            left - 1,
+                            top - 1,
+                            BOXSIZE + 2,
+                            BOXSIZE + 2,
+                        ),  # The rectangle's position and size
+                    )
+            drawBoard(board, coveredBoxes)  # Redraw the board with all boxes revealed
+            pygame.display.update()  # Update the display to show the new drawing
+            pygame.time.wait(
+                500
+            )  # Pause for 500 milliseconds before the next color change
 
-    for i in range(13):
-        color1, color2 = color2, color1  # swap colors
-        DISPLAYSURF.fill(color1)
-        drawBoard(board, coveredBoxes)
-        pygame.display.update()
-        pygame.time.wait(300)
+    # Baranje 3
+    # Display image moving from top left to top right
+    for i in range(0, 640, 5):  # Loop from 0 to 640 in steps of 5
+        DISPLAYSURF.fill(
+            BGCOLOR
+        )  # Fill the entire display surface with the background color
+        DISPLAYSURF.blit(
+            game_win_image, (i, 0)
+        )  # Draw the game_win_image at position (i, 0) on the display surface
+        pygame.display.update()  # Update the display to show the changes made to the display surface
+        pygame.time.wait(
+            50
+        )  # Pause the program for 50 milliseconds before continuing the loop
 
 
 def hasWon(revealedBoxes):
