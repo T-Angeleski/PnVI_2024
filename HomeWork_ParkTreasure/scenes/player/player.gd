@@ -1,19 +1,19 @@
 extends CharacterBody3D
 
 var speed
-const WALK_SPEED = 5.0
-const SPRINT_SPEED = 8.0
-const JUMP_VELOCITY = 4.8
-const SENSITIVITY = 0.004
+const WALK_SPEED := 2.5
+const SPRINT_SPEED := 4.0
+const JUMP_VELOCITY := 4.8
+const SENSITIVITY := 0.004
 
-const BOB_FREQ = 2.4
-const BOB_AMP = 0.05
-var t_bob = 0.0
+const BOB_FREQ := 2.4
+const BOB_AMP := 0.15
+var t_bob := 0.0
 
-const BASE_FOV = 75.0
-const FOV_CHANGE = 1.5
+const BASE_FOV := 75.0
+const FOV_CHANGE := 1.5
 
-var gravity = 9.8
+var gravity := 9.8
 
 @export var head: Node3D
 @export var camera: Camera3D
@@ -22,13 +22,17 @@ var gravity = 9.8
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
+func _input(event):
+	if event.is_action_pressed("escape"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
-func _unhandled_input(event):
 	if event is InputEventMouseMotion:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-40), deg_to_rad(60))
-
 
 func _physics_process(delta):
 	if not is_on_floor():

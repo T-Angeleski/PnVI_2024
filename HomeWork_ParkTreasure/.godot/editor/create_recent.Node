@@ -1,5 +1,14 @@
+GridMap
+Marker3D
+Timer
+Label
+Panel
+Control
 Node3D
-Camera3D
+Node
 MeshInstance3D
-CharacterBody3D
-CSGBox3D
+CollisionShape3D
+Area3D
+DirectionalLight3D
+StaticBody3D
+Camera3D

@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3 uid="uid://b32ibyvoonq2k"]
+
+[ext_resource type="Script" path="res://scenes/treasure/treasure.gd" id="1_7lm5u"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_5j5ax"]
+radius = 0.292631
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hm61x"]
+albedo_color = Color(1, 1, 0.278431, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_7l8s3"]
+material = SubResource("StandardMaterial3D_hm61x")
+radius = 0.3
+height = 0.5
+
+[node name="Treasure" type="Area3D"]
+script = ExtResource("1_7lm5u")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_5j5ax")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.173241, 0, 0, 0)
+mesh = SubResource("SphereMesh_7l8s3")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

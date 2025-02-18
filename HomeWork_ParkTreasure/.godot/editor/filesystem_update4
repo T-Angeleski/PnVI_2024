@@ -1,3 +1,8 @@
+res://scenes/game/game_manager.gd
+res://scenes/treasure/treasure.gd
+res://scenes/UI/UI.tscn
+res://addons/mesh_library/nature_pack_mesh_library.tres
 res://scenes/game/game.tscn
 res://scenes/player/player.tscn
+res://scenes/treasure/treasure.tscn
 res://scenes/player/player.gd
